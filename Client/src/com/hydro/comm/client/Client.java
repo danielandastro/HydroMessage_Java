@@ -22,11 +22,9 @@ public class Client {
 	}
 
 	public void start() throws IOException {
-		
 		// Initial connection thread
 		new Thread(() -> {
 			if (socket.isConnected()) {
-				System.out.println("CLIENT CONNECTED TO" + socket.getInetAddress().getHostAddress());
 				String ACK = "HELLO";
 				try {
 					OutputStream OS = socket.getOutputStream();
@@ -47,11 +45,11 @@ public class Client {
 			try {
 				InputStream IS = socket.getInputStream();
 				DataInputStream DIS = new DataInputStream(IS);
-				while(socket.isConnected()) {
+				while (socket.isConnected()) {
 					response = DIS.readUTF();
-					System.out.println(response);
-					
+					System.out.println("FROM SERVER : "+ response);
 				}
+				System.out.println("client disconnected");
 			} catch (Exception e) {
 				System.err.println(e.toString());
 			}
@@ -63,6 +61,23 @@ public class Client {
 			return client;
 		}
 		return new Client();
+	}
+
+	public void sendMessage(String message) {
+		if (socket.isConnected()) {
+			new Thread(() -> {
+				try {
+					OutputStream OS = socket.getOutputStream();
+					DataOutputStream DOS = new DataOutputStream(OS);
+					DOS.writeUTF(message);
+				} catch (Exception e) {
+					System.out.println("Sending message error" + e.toString());
+				}
+			}).start();
+
+		} else {
+			System.out.println("Client not connected");
+		}
 	}
 
 }
